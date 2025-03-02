@@ -1,0 +1,28 @@
+version: v1
+plugins:
+  - name: go
+    out: ../
+    opt:
+      - paths=source_relative
+      - Mapi/item/v1/item.proto=github.com/RyseUp/in-game-item-system/api/item/v1
+      - Mapi/inventory/v1/inventory.proto=github.com/RyseUp/in-game-item-system/api/inventory/v1
+      - Mapi/transaction/v1/transaction.proto=github.com/RyseUp/in-game-item-system/api/transaction/v1
+      - Mapi/audit/v1/audit.proto=github.com/RyseUp/in-game-item-system/api/audit/v1
+
+  - name: go-grpc
+    out: ../
+    opt:
+      - paths=source_relative
+      - Mapi/item/v1/item.proto=github.com/RyseUp/in-game-item-system/api/item/v1
+      - Mapi/inventory/v1/inventory.proto=github.com/RyseUp/in-game-item-system/api/inventory/v1
+      - Mapi/transaction/v1/transaction.proto=github.com/RyseUp/in-game-item-system/api/transaction/v1
+      - Mapi/audit/v1/audit.proto=github.com/RyseUp/in-game-item-system/api/audit/v1
+
+  - name: connect-go  # ✅ Adding support for Connect RPC
+    out: ../
+    opt:
+      - paths=source_relative
+      - Mapi/item/v1/item.proto=github.com/RyseUp/in-game-item-system/api/item/v1
+      - Mapi/inventory/v1/inventory.proto=github.com/RyseUp/in-game-item-system/api/inventory/v1
+      - Mapi/transaction/v1/transaction.proto=github.com/RyseUp/in-game-item-system/api/transaction/v1
+      - Mapi/audit/v1/audit.proto=github.com/RyseUp/in-game-item-system/api/audit/v1

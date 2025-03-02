@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package api.v1.transaction;
+
+import "buf/validate/validate.proto";
+
+service TransactionAPI {
+  rpc CreateTransaction(CreateTransactionRequest) returns (CreateTransactionResponse);
+  rpc GetTransaction(GetTransactionRequest) returns (GetTransactionResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  };
+  rpc ListTransactions(ListTransactionsRequest) returns (ListTransactionsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  };
+}
+
+message CreateTransactionRequest {
+  string user_id = 1 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 100
+  }];
+  string item_id = 2 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 100
+  }];
+  int32 quantity = 3 [(buf.validate.field).int32.gt = 0];
+  string transaction_type = 4 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 100
+  }];
+  int32 pre_balance = 5 [(buf.validate.field).int32.gte = 0];
+  int32 post_balance = 6 [(buf.validate.field).int32.gte = 0];
+}
+
+message CreateTransactionResponse {
+  string message = 1;
+}
+
+message GetTransactionRequest {
+  string transaction_id = 1 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 100
+  }];
+}
+
+message GetTransactionResponse {
+  string transaction_id = 1;
+  string user_id = 2;
+  string item_id = 3;
+  int32 quantity = 4;
+  string transaction_type = 5;
+  int32 pre_balance = 6;
+  int32 post_balance = 7;
+  string created_at = 8;
+}
+
+message ListTransactionsRequest {
+  string user_id = 1 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 100
+  }];
+  int32 page = 2 [(buf.validate.field).int32 = {gte: 0}];
+  int32 limit = 3 [(buf.validate.field).int32 = {
+    gte: 1
+    lte: 100
+  }];
+}
+
+message ListTransactionsResponse {
+  repeated GetTransactionResponse transactions = 1;
+}

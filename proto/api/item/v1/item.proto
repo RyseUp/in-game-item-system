@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+package api.item.v1;
+
+import "buf/validate/validate.proto";
+
+service ItemService {
+  rpc GetItem(GetItemRequest) returns (GetItemResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  };
+  rpc CreateItem(CreateItemRequest) returns (CreateItemResponse);
+  rpc UpdateItem(UpdateItemRequest) returns (UpdateItemResponse);
+  rpc DeleteItem(DeleteItemRequest) returns (DeleteItemResponse);
+  rpc ListItems(ListItemsRequest) returns (ListItemsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  };
+}
+
+message GetItemRequest {
+  string item_id = 1 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 100
+  }];
+}
+
+message GetItemResponse {
+  string item_id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message CreateItemRequest {
+  string name = 1 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 100
+  }];
+  string description = 2 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 500
+  }];
+}
+
+message CreateItemResponse {
+  string item_id = 1;
+}
+
+message UpdateItemRequest {
+  string item_id = 1 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 100
+  }];
+  string name = 2 [(buf.validate.field).string.min_len = 3];
+  string description = 3 [(buf.validate.field).string.max_len = 500];
+}
+
+message UpdateItemResponse {
+  string message = 1;
+}
+
+message DeleteItemRequest {
+  string item_id = 1 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 100
+  }];
+}
+
+message DeleteItemResponse {
+  string message = 1;
+}
+
+message ListItemsRequest {
+  int32 page = 1 [(buf.validate.field).int32 = {gte: 0}];
+  int32 limit = 2 [(buf.validate.field).int32 = {
+    gte: 1
+    lte: 100
+  }];
+}
+
+message ListItemsResponse {
+  repeated Item items = 1;
+}
+
+message Item {
+  string item_id = 1;
+  string name = 2;
+  string description = 3;
+}

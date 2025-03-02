@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package api.inventory.v1;
+
+import "buf/validate/validate.proto";
+
+service InventoryAPI {
+  rpc GetInventory(GetInventoryRequest) returns (GetInventoryResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+  rpc UpdateInventory(UpdateInventoryRequest) returns (UpdateInventoryResponse);
+}
+
+message GetInventoryRequest {
+  string user_id = 1 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 100
+  }];
+  string item_id = 2 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 100
+  }];
+}
+
+message GetInventoryResponse {
+  string user_id = 1;
+  string item_id = 2;
+  int32 quantity = 4;
+}
+
+message UpdateInventoryRequest {
+  string user_id = 1 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 100
+  }];
+  string item_id = 2 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 100
+  }];
+  int32 quantity = 3 [(buf.validate.field).int32.gt = 0];
+}
+
+message UpdateInventoryResponse {
+  string message = 1;
+}
