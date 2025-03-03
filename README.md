@@ -46,6 +46,22 @@ cd in-game-item-system
 
 ````
 ### 2️⃣ Configure Environment Variables
+```sh
+touch .env
+````
+````
+POSTGRES_HOST=postgres
+POSTGRES_USER=user
+POSTGRES_PASSWORD=password
+POSTGRES_DB=game_items
+POSTGRES_PORT=5432
+POSTGRES_SSLMODE=disable
+
+RABBITMQ_HOST=rabbitmq
+RABBITMQ_DEFAULT_USER=guest
+RABBITMQ_DEFAULT_PASS=guest
+RABBITMQ_PORT=5672
+````
 
 ### 3️⃣ Run the project using Docker Compose
 
@@ -53,11 +69,21 @@ cd in-game-item-system
 docker-compose up --build -d
 ```
 ### 4️⃣ Test the APIs using Postman
+Get Inventory
 ```sh
-http://localhost:50051/api.inventory.v1.InventoryAPI/UserUseItemInInventory
-{
-  "user_id": "user_001",
-  "item_id": "item_001",
-  "quantity": 5
-}
+curl -X POST http://localhost:50051/api.inventory.v1.InventoryAPI/UserGetInventory \
+     -H "Content-Type: application/json" \
+     -d '{"user_id": "user_001", "item_id": "item_001"}'
 ```
+Add Item to Inventory
+````sh
+curl -X POST http://localhost:50051/api.inventory.v1.InventoryAPI/UserAddItemInInventory \
+     -H "Content-Type: application/json" \
+     -d '{"user_id": "user_001", "item_id": "item_002", "quantity": 2}'
+````
+Use Item in Inventory
+````sh
+curl -X POST http://localhost:50051/api.inventory.v1.InventoryAPI/UserUseItemInInventory \
+     -H "Content-Type: application/json" \
+     -d '{"user_id": "user_001", "item_id": "item_001", "quantity": 5}'
+````
