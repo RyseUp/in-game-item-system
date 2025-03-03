@@ -9,7 +9,6 @@ import (
 
 type Config struct {
 	PostgresSQL string
-	Redis       string
 }
 
 func Load() *Config {
@@ -20,6 +19,5 @@ func Load() *Config {
 
 	return &Config{
 		PostgresSQL: os.Getenv("POSTGRES_DB"),
-		Redis:       os.Getenv("REDIS_URL"),
 	}
 }
