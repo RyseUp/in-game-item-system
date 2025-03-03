@@ -54,7 +54,7 @@ docker-compose up --build -d
 ```
 ### 4️⃣ Test the APIs using Postman
 ```sh
-http://localhost:50051/api.inventory.v1.InventoryAPI/UpdateInventory
+http://localhost:50051/api.inventory.v1.InventoryAPI/UserUseItemInInventory
 {
   "user_id": "user_001",
   "item_id": "item_001",
