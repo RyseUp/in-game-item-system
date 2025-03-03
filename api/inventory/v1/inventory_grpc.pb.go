@@ -19,16 +19,18 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	InventoryAPI_GetInventory_FullMethodName    = "/api.inventory.v1.InventoryAPI/GetInventory"
-	InventoryAPI_UpdateInventory_FullMethodName = "/api.inventory.v1.InventoryAPI/UpdateInventory"
+	InventoryAPI_UserGetInventory_FullMethodName       = "/api.inventory.v1.InventoryAPI/UserGetInventory"
+	InventoryAPI_UserAddItemInInventory_FullMethodName = "/api.inventory.v1.InventoryAPI/UserAddItemInInventory"
+	InventoryAPI_UserUseItemInInventory_FullMethodName = "/api.inventory.v1.InventoryAPI/UserUseItemInInventory"
 )
 
 // InventoryAPIClient is the client API for InventoryAPI service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type InventoryAPIClient interface {
-	GetInventory(ctx context.Context, in *GetInventoryRequest, opts ...grpc.CallOption) (*GetInventoryResponse, error)
-	UpdateInventory(ctx context.Context, in *UpdateInventoryRequest, opts ...grpc.CallOption) (*UpdateInventoryResponse, error)
+	UserGetInventory(ctx context.Context, in *UserGetInventoryRequest, opts ...grpc.CallOption) (*UserGetInventoryResponse, error)
+	UserAddItemInInventory(ctx context.Context, in *UserAddItemInInventoryRequest, opts ...grpc.CallOption) (*UserAddItemInInventoryResponse, error)
+	UserUseItemInInventory(ctx context.Context, in *UserUseItemInInventoryRequest, opts ...grpc.CallOption) (*UserUseItemInInventoryResponse, error)
 }
 
 type inventoryAPIClient struct {
@@ -39,20 +41,30 @@ func NewInventoryAPIClient(cc grpc.ClientConnInterface) InventoryAPIClient {
 	return &inventoryAPIClient{cc}
 }
 
-func (c *inventoryAPIClient) GetInventory(ctx context.Context, in *GetInventoryRequest, opts ...grpc.CallOption) (*GetInventoryResponse, error) {
+func (c *inventoryAPIClient) UserGetInventory(ctx context.Context, in *UserGetInventoryRequest, opts ...grpc.CallOption) (*UserGetInventoryResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetInventoryResponse)
-	err := c.cc.Invoke(ctx, InventoryAPI_GetInventory_FullMethodName, in, out, cOpts...)
+	out := new(UserGetInventoryResponse)
+	err := c.cc.Invoke(ctx, InventoryAPI_UserGetInventory_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *inventoryAPIClient) UpdateInventory(ctx context.Context, in *UpdateInventoryRequest, opts ...grpc.CallOption) (*UpdateInventoryResponse, error) {
+func (c *inventoryAPIClient) UserAddItemInInventory(ctx context.Context, in *UserAddItemInInventoryRequest, opts ...grpc.CallOption) (*UserAddItemInInventoryResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateInventoryResponse)
-	err := c.cc.Invoke(ctx, InventoryAPI_UpdateInventory_FullMethodName, in, out, cOpts...)
+	out := new(UserAddItemInInventoryResponse)
+	err := c.cc.Invoke(ctx, InventoryAPI_UserAddItemInInventory_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *inventoryAPIClient) UserUseItemInInventory(ctx context.Context, in *UserUseItemInInventoryRequest, opts ...grpc.CallOption) (*UserUseItemInInventoryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UserUseItemInInventoryResponse)
+	err := c.cc.Invoke(ctx, InventoryAPI_UserUseItemInInventory_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -63,8 +75,9 @@ func (c *inventoryAPIClient) UpdateInventory(ctx context.Context, in *UpdateInve
 // All implementations must embed UnimplementedInventoryAPIServer
 // for forward compatibility.
 type InventoryAPIServer interface {
-	GetInventory(context.Context, *GetInventoryRequest) (*GetInventoryResponse, error)
-	UpdateInventory(context.Context, *UpdateInventoryRequest) (*UpdateInventoryResponse, error)
+	UserGetInventory(context.Context, *UserGetInventoryRequest) (*UserGetInventoryResponse, error)
+	UserAddItemInInventory(context.Context, *UserAddItemInInventoryRequest) (*UserAddItemInInventoryResponse, error)
+	UserUseItemInInventory(context.Context, *UserUseItemInInventoryRequest) (*UserUseItemInInventoryResponse, error)
 	mustEmbedUnimplementedInventoryAPIServer()
 }
 
@@ -75,11 +88,14 @@ type InventoryAPIServer interface {
 // pointer dereference when methods are called.
 type UnimplementedInventoryAPIServer struct{}
 
-func (UnimplementedInventoryAPIServer) GetInventory(context.Context, *GetInventoryRequest) (*GetInventoryResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetInventory not implemented")
+func (UnimplementedInventoryAPIServer) UserGetInventory(context.Context, *UserGetInventoryRequest) (*UserGetInventoryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UserGetInventory not implemented")
 }
-func (UnimplementedInventoryAPIServer) UpdateInventory(context.Context, *UpdateInventoryRequest) (*UpdateInventoryResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateInventory not implemented")
+func (UnimplementedInventoryAPIServer) UserAddItemInInventory(context.Context, *UserAddItemInInventoryRequest) (*UserAddItemInInventoryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UserAddItemInInventory not implemented")
+}
+func (UnimplementedInventoryAPIServer) UserUseItemInInventory(context.Context, *UserUseItemInInventoryRequest) (*UserUseItemInInventoryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UserUseItemInInventory not implemented")
 }
 func (UnimplementedInventoryAPIServer) mustEmbedUnimplementedInventoryAPIServer() {}
 func (UnimplementedInventoryAPIServer) testEmbeddedByValue()                      {}
@@ -102,38 +118,56 @@ func RegisterInventoryAPIServer(s grpc.ServiceRegistrar, srv InventoryAPIServer)
 	s.RegisterService(&InventoryAPI_ServiceDesc, srv)
 }
 
-func _InventoryAPI_GetInventory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetInventoryRequest)
+func _InventoryAPI_UserGetInventory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserGetInventoryRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(InventoryAPIServer).GetInventory(ctx, in)
+		return srv.(InventoryAPIServer).UserGetInventory(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: InventoryAPI_GetInventory_FullMethodName,
+		FullMethod: InventoryAPI_UserGetInventory_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(InventoryAPIServer).GetInventory(ctx, req.(*GetInventoryRequest))
+		return srv.(InventoryAPIServer).UserGetInventory(ctx, req.(*UserGetInventoryRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _InventoryAPI_UpdateInventory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateInventoryRequest)
+func _InventoryAPI_UserAddItemInInventory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserAddItemInInventoryRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(InventoryAPIServer).UpdateInventory(ctx, in)
+		return srv.(InventoryAPIServer).UserAddItemInInventory(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: InventoryAPI_UpdateInventory_FullMethodName,
+		FullMethod: InventoryAPI_UserAddItemInInventory_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(InventoryAPIServer).UpdateInventory(ctx, req.(*UpdateInventoryRequest))
+		return srv.(InventoryAPIServer).UserAddItemInInventory(ctx, req.(*UserAddItemInInventoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _InventoryAPI_UserUseItemInInventory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserUseItemInInventoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(InventoryAPIServer).UserUseItemInInventory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: InventoryAPI_UserUseItemInInventory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(InventoryAPIServer).UserUseItemInInventory(ctx, req.(*UserUseItemInInventoryRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -146,12 +180,16 @@ var InventoryAPI_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*InventoryAPIServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetInventory",
-			Handler:    _InventoryAPI_GetInventory_Handler,
+			MethodName: "UserGetInventory",
+			Handler:    _InventoryAPI_UserGetInventory_Handler,
 		},
 		{
-			MethodName: "UpdateInventory",
-			Handler:    _InventoryAPI_UpdateInventory_Handler,
+			MethodName: "UserAddItemInInventory",
+			Handler:    _InventoryAPI_UserAddItemInInventory_Handler,
+		},
+		{
+			MethodName: "UserUseItemInInventory",
+			Handler:    _InventoryAPI_UserUseItemInInventory_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

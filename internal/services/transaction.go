@@ -64,7 +64,7 @@ func (s *TransactionAPI) CreateTransaction(ctx context.Context, c *connect.Reque
 	}
 
 	tx.Commit()
-	go PublishTransactionEvent(req.UserId, req.ItemId, transaction.TransactionID, req.Quantity, req.TransactionType)
+	go PublishTransactionEvent(req.UserId, req.ItemId, transaction.TransactionID, req.Quantity, req.TransactionType, transaction.PreBalance, transaction.PostBalance)
 
 	return connect.NewResponse(&v1.CreateTransactionResponse{Message: "Transaction recorded"}), nil
 }

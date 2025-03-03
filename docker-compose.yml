@@ -31,6 +31,18 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
+  game_item_service:
+    build: .
+    container_name: game_item_service
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - rabbitmq
+    ports:
+      - "50051:50051"
+
 volumes:
   postgres_data:
   rabbitmq_data:

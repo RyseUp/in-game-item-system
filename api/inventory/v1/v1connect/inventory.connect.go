@@ -33,18 +33,22 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
-	// InventoryAPIGetInventoryProcedure is the fully-qualified name of the InventoryAPI's GetInventory
-	// RPC.
-	InventoryAPIGetInventoryProcedure = "/api.inventory.v1.InventoryAPI/GetInventory"
-	// InventoryAPIUpdateInventoryProcedure is the fully-qualified name of the InventoryAPI's
-	// UpdateInventory RPC.
-	InventoryAPIUpdateInventoryProcedure = "/api.inventory.v1.InventoryAPI/UpdateInventory"
+	// InventoryAPIUserGetInventoryProcedure is the fully-qualified name of the InventoryAPI's
+	// UserGetInventory RPC.
+	InventoryAPIUserGetInventoryProcedure = "/api.inventory.v1.InventoryAPI/UserGetInventory"
+	// InventoryAPIUserAddItemInInventoryProcedure is the fully-qualified name of the InventoryAPI's
+	// UserAddItemInInventory RPC.
+	InventoryAPIUserAddItemInInventoryProcedure = "/api.inventory.v1.InventoryAPI/UserAddItemInInventory"
+	// InventoryAPIUserUseItemInInventoryProcedure is the fully-qualified name of the InventoryAPI's
+	// UserUseItemInInventory RPC.
+	InventoryAPIUserUseItemInInventoryProcedure = "/api.inventory.v1.InventoryAPI/UserUseItemInInventory"
 )
 
 // InventoryAPIClient is a client for the api.inventory.v1.InventoryAPI service.
 type InventoryAPIClient interface {
-	GetInventory(context.Context, *connect_go.Request[v1.GetInventoryRequest]) (*connect_go.Response[v1.GetInventoryResponse], error)
-	UpdateInventory(context.Context, *connect_go.Request[v1.UpdateInventoryRequest]) (*connect_go.Response[v1.UpdateInventoryResponse], error)
+	UserGetInventory(context.Context, *connect_go.Request[v1.UserGetInventoryRequest]) (*connect_go.Response[v1.UserGetInventoryResponse], error)
+	UserAddItemInInventory(context.Context, *connect_go.Request[v1.UserAddItemInInventoryRequest]) (*connect_go.Response[v1.UserAddItemInInventoryResponse], error)
+	UserUseItemInInventory(context.Context, *connect_go.Request[v1.UserUseItemInInventoryRequest]) (*connect_go.Response[v1.UserUseItemInInventoryResponse], error)
 }
 
 // NewInventoryAPIClient constructs a client for the api.inventory.v1.InventoryAPI service. By
@@ -57,15 +61,20 @@ type InventoryAPIClient interface {
 func NewInventoryAPIClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) InventoryAPIClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &inventoryAPIClient{
-		getInventory: connect_go.NewClient[v1.GetInventoryRequest, v1.GetInventoryResponse](
+		userGetInventory: connect_go.NewClient[v1.UserGetInventoryRequest, v1.UserGetInventoryResponse](
 			httpClient,
-			baseURL+InventoryAPIGetInventoryProcedure,
+			baseURL+InventoryAPIUserGetInventoryProcedure,
 			connect_go.WithIdempotency(connect_go.IdempotencyNoSideEffects),
 			connect_go.WithClientOptions(opts...),
 		),
-		updateInventory: connect_go.NewClient[v1.UpdateInventoryRequest, v1.UpdateInventoryResponse](
+		userAddItemInInventory: connect_go.NewClient[v1.UserAddItemInInventoryRequest, v1.UserAddItemInInventoryResponse](
 			httpClient,
-			baseURL+InventoryAPIUpdateInventoryProcedure,
+			baseURL+InventoryAPIUserAddItemInInventoryProcedure,
+			opts...,
+		),
+		userUseItemInInventory: connect_go.NewClient[v1.UserUseItemInInventoryRequest, v1.UserUseItemInInventoryResponse](
+			httpClient,
+			baseURL+InventoryAPIUserUseItemInInventoryProcedure,
 			opts...,
 		),
 	}
@@ -73,24 +82,31 @@ func NewInventoryAPIClient(httpClient connect_go.HTTPClient, baseURL string, opt
 
 // inventoryAPIClient implements InventoryAPIClient.
 type inventoryAPIClient struct {
-	getInventory    *connect_go.Client[v1.GetInventoryRequest, v1.GetInventoryResponse]
-	updateInventory *connect_go.Client[v1.UpdateInventoryRequest, v1.UpdateInventoryResponse]
+	userGetInventory       *connect_go.Client[v1.UserGetInventoryRequest, v1.UserGetInventoryResponse]
+	userAddItemInInventory *connect_go.Client[v1.UserAddItemInInventoryRequest, v1.UserAddItemInInventoryResponse]
+	userUseItemInInventory *connect_go.Client[v1.UserUseItemInInventoryRequest, v1.UserUseItemInInventoryResponse]
 }
 
-// GetInventory calls api.inventory.v1.InventoryAPI.GetInventory.
-func (c *inventoryAPIClient) GetInventory(ctx context.Context, req *connect_go.Request[v1.GetInventoryRequest]) (*connect_go.Response[v1.GetInventoryResponse], error) {
-	return c.getInventory.CallUnary(ctx, req)
+// UserGetInventory calls api.inventory.v1.InventoryAPI.UserGetInventory.
+func (c *inventoryAPIClient) UserGetInventory(ctx context.Context, req *connect_go.Request[v1.UserGetInventoryRequest]) (*connect_go.Response[v1.UserGetInventoryResponse], error) {
+	return c.userGetInventory.CallUnary(ctx, req)
 }
 
-// UpdateInventory calls api.inventory.v1.InventoryAPI.UpdateInventory.
-func (c *inventoryAPIClient) UpdateInventory(ctx context.Context, req *connect_go.Request[v1.UpdateInventoryRequest]) (*connect_go.Response[v1.UpdateInventoryResponse], error) {
-	return c.updateInventory.CallUnary(ctx, req)
+// UserAddItemInInventory calls api.inventory.v1.InventoryAPI.UserAddItemInInventory.
+func (c *inventoryAPIClient) UserAddItemInInventory(ctx context.Context, req *connect_go.Request[v1.UserAddItemInInventoryRequest]) (*connect_go.Response[v1.UserAddItemInInventoryResponse], error) {
+	return c.userAddItemInInventory.CallUnary(ctx, req)
+}
+
+// UserUseItemInInventory calls api.inventory.v1.InventoryAPI.UserUseItemInInventory.
+func (c *inventoryAPIClient) UserUseItemInInventory(ctx context.Context, req *connect_go.Request[v1.UserUseItemInInventoryRequest]) (*connect_go.Response[v1.UserUseItemInInventoryResponse], error) {
+	return c.userUseItemInInventory.CallUnary(ctx, req)
 }
 
 // InventoryAPIHandler is an implementation of the api.inventory.v1.InventoryAPI service.
 type InventoryAPIHandler interface {
-	GetInventory(context.Context, *connect_go.Request[v1.GetInventoryRequest]) (*connect_go.Response[v1.GetInventoryResponse], error)
-	UpdateInventory(context.Context, *connect_go.Request[v1.UpdateInventoryRequest]) (*connect_go.Response[v1.UpdateInventoryResponse], error)
+	UserGetInventory(context.Context, *connect_go.Request[v1.UserGetInventoryRequest]) (*connect_go.Response[v1.UserGetInventoryResponse], error)
+	UserAddItemInInventory(context.Context, *connect_go.Request[v1.UserAddItemInInventoryRequest]) (*connect_go.Response[v1.UserAddItemInInventoryResponse], error)
+	UserUseItemInInventory(context.Context, *connect_go.Request[v1.UserUseItemInInventoryRequest]) (*connect_go.Response[v1.UserUseItemInInventoryResponse], error)
 }
 
 // NewInventoryAPIHandler builds an HTTP handler from the service implementation. It returns the
@@ -99,23 +115,30 @@ type InventoryAPIHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewInventoryAPIHandler(svc InventoryAPIHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	inventoryAPIGetInventoryHandler := connect_go.NewUnaryHandler(
-		InventoryAPIGetInventoryProcedure,
-		svc.GetInventory,
+	inventoryAPIUserGetInventoryHandler := connect_go.NewUnaryHandler(
+		InventoryAPIUserGetInventoryProcedure,
+		svc.UserGetInventory,
 		connect_go.WithIdempotency(connect_go.IdempotencyNoSideEffects),
 		connect_go.WithHandlerOptions(opts...),
 	)
-	inventoryAPIUpdateInventoryHandler := connect_go.NewUnaryHandler(
-		InventoryAPIUpdateInventoryProcedure,
-		svc.UpdateInventory,
+	inventoryAPIUserAddItemInInventoryHandler := connect_go.NewUnaryHandler(
+		InventoryAPIUserAddItemInInventoryProcedure,
+		svc.UserAddItemInInventory,
+		opts...,
+	)
+	inventoryAPIUserUseItemInInventoryHandler := connect_go.NewUnaryHandler(
+		InventoryAPIUserUseItemInInventoryProcedure,
+		svc.UserUseItemInInventory,
 		opts...,
 	)
 	return "/api.inventory.v1.InventoryAPI/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case InventoryAPIGetInventoryProcedure:
-			inventoryAPIGetInventoryHandler.ServeHTTP(w, r)
-		case InventoryAPIUpdateInventoryProcedure:
-			inventoryAPIUpdateInventoryHandler.ServeHTTP(w, r)
+		case InventoryAPIUserGetInventoryProcedure:
+			inventoryAPIUserGetInventoryHandler.ServeHTTP(w, r)
+		case InventoryAPIUserAddItemInInventoryProcedure:
+			inventoryAPIUserAddItemInInventoryHandler.ServeHTTP(w, r)
+		case InventoryAPIUserUseItemInInventoryProcedure:
+			inventoryAPIUserUseItemInInventoryHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -125,10 +148,14 @@ func NewInventoryAPIHandler(svc InventoryAPIHandler, opts ...connect_go.HandlerO
 // UnimplementedInventoryAPIHandler returns CodeUnimplemented from all methods.
 type UnimplementedInventoryAPIHandler struct{}
 
-func (UnimplementedInventoryAPIHandler) GetInventory(context.Context, *connect_go.Request[v1.GetInventoryRequest]) (*connect_go.Response[v1.GetInventoryResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("api.inventory.v1.InventoryAPI.GetInventory is not implemented"))
+func (UnimplementedInventoryAPIHandler) UserGetInventory(context.Context, *connect_go.Request[v1.UserGetInventoryRequest]) (*connect_go.Response[v1.UserGetInventoryResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("api.inventory.v1.InventoryAPI.UserGetInventory is not implemented"))
 }
 
-func (UnimplementedInventoryAPIHandler) UpdateInventory(context.Context, *connect_go.Request[v1.UpdateInventoryRequest]) (*connect_go.Response[v1.UpdateInventoryResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("api.inventory.v1.InventoryAPI.UpdateInventory is not implemented"))
+func (UnimplementedInventoryAPIHandler) UserAddItemInInventory(context.Context, *connect_go.Request[v1.UserAddItemInInventoryRequest]) (*connect_go.Response[v1.UserAddItemInInventoryResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("api.inventory.v1.InventoryAPI.UserAddItemInInventory is not implemented"))
+}
+
+func (UnimplementedInventoryAPIHandler) UserUseItemInInventory(context.Context, *connect_go.Request[v1.UserUseItemInInventoryRequest]) (*connect_go.Response[v1.UserUseItemInInventoryResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("api.inventory.v1.InventoryAPI.UserUseItemInInventory is not implemented"))
 }

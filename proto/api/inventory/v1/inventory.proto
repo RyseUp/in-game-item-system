@@ -5,13 +5,14 @@ package api.inventory.v1;
 import "buf/validate/validate.proto";
 
 service InventoryAPI {
-  rpc GetInventory(GetInventoryRequest) returns (GetInventoryResponse) {
+  rpc UserGetInventory(UserGetInventoryRequest) returns (UserGetInventoryResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
   }
-  rpc UpdateInventory(UpdateInventoryRequest) returns (UpdateInventoryResponse);
+  rpc UserAddItemInInventory(UserAddItemInInventoryRequest) returns (UserAddItemInInventoryResponse);
+  rpc UserUseItemInInventory(UserUseItemInInventoryRequest) returns (UserUseItemInInventoryResponse);
 }
 
-message GetInventoryRequest {
+message UserGetInventoryRequest {
   string user_id = 1 [(buf.validate.field).string = {
     min_len: 1,
     max_len: 100
@@ -22,13 +23,13 @@ message GetInventoryRequest {
   }];
 }
 
-message GetInventoryResponse {
+message UserGetInventoryResponse {
   string user_id = 1;
   string item_id = 2;
   int32 quantity = 4;
 }
 
-message UpdateInventoryRequest {
+message UserAddItemInInventoryRequest {
   string user_id = 1 [(buf.validate.field).string = {
     min_len: 1,
     max_len: 100
@@ -40,6 +41,22 @@ message UpdateInventoryRequest {
   int32 quantity = 3 [(buf.validate.field).int32.gt = 0];
 }
 
-message UpdateInventoryResponse {
+message UserAddItemInInventoryResponse {
+  string message = 1;
+}
+
+message UserUseItemInInventoryRequest {
+  string user_id = 1 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 100
+  }];
+  string item_id = 2 [(buf.validate.field).string = {
+    min_len: 1,
+    max_len: 100
+  }];
+  int32 quantity = 3 [(buf.validate.field).int32.gt = 0];
+}
+
+message UserUseItemInInventoryResponse {
   string message = 1;
 }

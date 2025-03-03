@@ -35,7 +35,7 @@ func NewInventoryAPI(
 	}
 }
 
-func (s *InventoryAPI) GetInventory(ctx context.Context, c *connect.Request[v1.GetInventoryRequest]) (*connect.Response[v1.GetInventoryResponse], error) {
+func (s *InventoryAPI) UserGetInventory(ctx context.Context, c *connect.Request[v1.UserGetInventoryRequest]) (*connect.Response[v1.UserGetInventoryResponse], error) {
 	var (
 		req    = c.Msg
 		userID = req.GetUserId()
@@ -50,14 +50,14 @@ func (s *InventoryAPI) GetInventory(ctx context.Context, c *connect.Request[v1.G
 		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to get item: %w", err))
 	}
 
-	return connect.NewResponse(&v1.GetInventoryResponse{
+	return connect.NewResponse(&v1.UserGetInventoryResponse{
 		UserId:   inventory.UserID,
 		ItemId:   inventory.ItemID,
 		Quantity: inventory.Quantity,
 	}), nil
 }
 
-func (s *InventoryAPI) UpdateInventory(ctx context.Context, c *connect.Request[v1.UpdateInventoryRequest]) (*connect.Response[v1.UpdateInventoryResponse], error) {
+func (s *InventoryAPI) UserAddItemInInventory(ctx context.Context, c *connect.Request[v1.UserAddItemInInventoryRequest]) (*connect.Response[v1.UserAddItemInInventoryResponse], error) {
 	var (
 		req      = c.Msg
 		userID   = req.GetUserId()
@@ -97,8 +97,59 @@ func (s *InventoryAPI) UpdateInventory(ctx context.Context, c *connect.Request[v
 
 	tx.Commit()
 
-	go PublishTransactionEvent(userID, itemID, record.RecordID, quantity, "INVENTORY_UPDATE")
-	return connect.NewResponse(&v1.UpdateInventoryResponse{
+	go PublishTransactionEvent(userID, itemID, record.RecordID, quantity, "INVENTORY_UPDATE", record.PreBalance, record.PostBalance)
+	return connect.NewResponse(&v1.UserAddItemInInventoryResponse{
 		Message: "success",
+	}), nil
+}
+
+func (s *InventoryAPI) UserUseItemInInventory(ctx context.Context, c *connect.Request[v1.UserUseItemInInventoryRequest]) (*connect.Response[v1.UserUseItemInInventoryResponse], error) {
+	var (
+		req      = c.Msg
+		userID   = req.GetUserId()
+		itemID   = req.GetItemId()
+		quantity = req.GetQuantity()
+	)
+
+	tx := s.inventoryRepo.BeginTransaction()
+	defer tx.Rollback()
+
+	inventory, err := s.inventoryRepo.GetInventoryByUserIDAndItemID(ctx, userID, itemID)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, connect.NewError(connect.CodeNotFound, errors.New("inventory record not found"))
+	} else if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to retrieve inventory: %w", err))
+	}
+
+	if inventory.Quantity < quantity {
+		return nil, connect.NewError(connect.CodeFailedPrecondition, errors.New("insufficient item quantity"))
+	}
+
+	preBalance := inventory.Quantity
+	inventory.Quantity -= quantity
+
+	err = s.inventoryRepo.UpdateInventoryQuantity(ctx, tx, inventory)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to update inventory: %w", err))
+	}
+
+	record := &models.InventoryRecord{
+		RecordID:    uuid.New().String(),
+		UserID:      userID,
+		ItemID:      itemID,
+		PreBalance:  preBalance,
+		PostBalance: inventory.Quantity,
+	}
+	err = s.inventoryRecordRepo.CreateRecord(ctx, tx, record)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("failed to record inventory update: %w", err))
+	}
+
+	tx.Commit()
+
+	go PublishTransactionEvent(userID, itemID, record.RecordID, quantity, "ITEM_USED", record.PreBalance, record.PostBalance)
+
+	return connect.NewResponse(&v1.UserUseItemInInventoryResponse{
+		Message: "Item used successfully!",
 	}), nil
 }

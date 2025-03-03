@@ -16,10 +16,12 @@ type TransactionEvent struct {
 	ItemID          string `json:"item_id"`
 	Quantity        int32  `json:"quantity"`
 	TransactionType string `json:"transaction_type"`
+	PreBalance      int32  `json:"pre_balance"`
+	PostBalance     int32  `json:"post_balance"`
 }
 
 func ConsumeTransactionEvent(db *gorm.DB, transactionRepo repositories.Transaction) {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	conn, err := amqp.Dial("amqp://guest:guest@rabbitmq:5672/")
 	if err != nil {
 		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
 	}
@@ -75,6 +77,8 @@ func ConsumeTransactionEvent(db *gorm.DB, transactionRepo repositories.Transacti
 			ItemID:          event.ItemID,
 			Quantity:        event.Quantity,
 			TransactionType: event.TransactionType,
+			PreBalance:      event.PreBalance,
+			PostBalance:     event.PostBalance,
 		}
 
 		err = transactionRepo.CreateTransaction(context.Background(), tx, transaction)

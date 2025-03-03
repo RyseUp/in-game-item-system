@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/RyseUp/in-game-item-system/internal/models"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Inventory interface {
@@ -26,7 +27,9 @@ func NewInventoryStore(db *gorm.DB) *InventoryStore {
 func (s *InventoryStore) GetInventoryByUserIDAndItemID(ctx context.Context, userID, itemID string) (*models.Inventory, error) {
 	var inventory models.Inventory
 	err := s.db.WithContext(ctx).
+		Model(&models.Inventory{}).
 		Where("user_id = ? AND item_id = ?", userID, itemID).
+		Clauses(clause.Locking{Strength: "UPDATE"}).
 		First(&inventory).
 		Error
 	if err != nil {
